@@ -42,10 +42,3 @@ The `planning.md` file was highly effective for mapping out the architecture. Dr
 ## AI Usage Details
 1. **Tool Implementation:** I fed ChatGPT the specific parameters, return expectations, and failure scenarios for my three tools from my `planning.md`. I told it to write the code for `tools.py` using the data loader helper functions. It successfully connected to the Groq API, but I had to override its search function to manually inject the keyword scoring system so it would sort the results properly.
 2. **Agent Logic:** I gave ChatGPT my ASCII flow diagram and my planning loop breakdown. I expected it to build the `run_agent` function inside `agent.py` with the correct conditional structure. It did a great job setting up the session state and the conditional logic, but I had to intervene to fix an issue where it was passing the wrong variable names to the Gradio interface in `app.py`.
-
-## Demo Video
-*(Remember to record your 3–5 minute video covering:)*
-* A complete multi-step interaction (e.g., the vintage graphic tee query).
-* Narration of what the agent is doing at each step (e.g., "First it calls search listings...").
-* Showing state passing between tools visibly in the UI.
-* At least one triggered failure (e.g., searching for the $5 ballgown) and showing the graceful error response.
