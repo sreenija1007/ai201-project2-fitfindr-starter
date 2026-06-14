@@ -9,18 +9,41 @@ load_dotenv()
 ai_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 LLM_MODEL = "llama-3.3-70b-versatile"
 
-def search_listings(description, size=None, max_price=None):
+def search_listings(
+    description: str,
+    size: str | None = None,
+    max_price: float | None = None,
+) -> list[dict]:
     all_items = load_listings()
+    valid_matches = []
     
-    def is_match(item):
-        desc_match = description.lower() in item.get('description', '').lower() or description.lower() in item.get('title', '').lower()
-        size_match = True if not size else item.get('size') == size
-        price_match = True if not max_price else item.get('price', 0) <= max_price
-        
-        return desc_match and size_match and price_match
+    keywords = description.lower().split()
 
-    # Return filtered array
-    return [item for item in all_items if is_match(item)]
+    for item in all_items:
+        # Price check
+        if max_price and item.get("price", 999999) > max_price:
+            continue
+            
+        # Size check
+        if size and size.lower() not in item.get("size", "").lower():
+            continue
+
+        # Calculate score based on tags, title, and description
+        combined_text = f"{item.get('title', '')} {item.get('description', '')} {' '.join(item.get('style_tags', []))}".lower()
+        
+        match_score = sum(1 for word in keywords if word in combined_text)
+        
+        if match_score > 0:
+            item_copy = item.copy()
+            item_copy['_match_score'] = match_score
+            valid_matches.append(item_copy)
+
+    # Sort by the injected score key, then remove it before returning
+    valid_matches.sort(key=lambda x: x['_match_score'], reverse=True)
+    for match in valid_matches:
+        del match['_match_score']
+        
+    return valid_matches
 
 def suggest_outfit(new_item, wardrobe):
     # Early exit if the closet is completely empty
